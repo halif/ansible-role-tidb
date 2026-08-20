@@ -1,0 +1,14 @@
+---
+- name: Include prerequisite packages
+  ansible.builtin.include_tasks: prereqs.yml
+
+- name: Include TiDB service user setup
+  ansible.builtin.include_tasks: user.yml
+  when: tidb_create_user | bool
+
+- name: Include TiUP installation
+  ansible.builtin.include_tasks: install.yml
+
+- name: Include playground deployment
+  ansible.builtin.include_tasks: playground.yml
+  when: tidb_playground_enabled | bool

@@ -1,0 +1,18 @@
+---
+- name: Install prerequisite packages (RHEL family)
+  ansible.builtin.dnf:
+    name:
+      - curl
+      - tar
+      - which
+    state: present
+  when: ansible_facts['os_family'] == 'RedHat'
+
+- name: Install prerequisite packages (Debian family)
+  ansible.builtin.apt:
+    name:
+      - curl
+      - tar
+    state: present
+    update_cache: true
+  when: ansible_facts['os_family'] == 'Debian'

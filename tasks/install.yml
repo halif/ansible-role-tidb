@@ -1,0 +1,24 @@
+---
+# Официальный публичный установщик TiUP — не требует ни регистрации,
+# ни лицензионных ключей, ни приватных репозиториев.
+- name: Download and install TiUP for {{ tidb_user }}
+  ansible.builtin.shell: |
+    curl --proto '=https' --tlsv1.2 -sSf {{ tiup_install_url }} | sh
+  args:
+    creates: "{{ tiup_bin_dir }}/tiup"
+  become: true
+  become_user: "{{ tidb_user }}"
+  # su вместо sudo: избегаем PAM account-фазы (pam_sss), которая в
+  # минимальных контейнерных образах RHEL/Rocky падает с ошибкой
+  # "Authentication service cannot retrieve authentication info".
+  become_method: su
+  environment:
+    HOME: "{{ tidb_home }}"
+
+- name: Deploy shell profile snippet with TiUP on PATH
+  ansible.builtin.template:
+    src: tiup-env.sh.j2
+    dest: /etc/profile.d/tiup.sh
+    owner: root
+    group: root
+    mode: '0644'

@@ -1,0 +1,25 @@
+---
+- name: Render systemd unit for TiUP playground
+  ansible.builtin.template:
+    src: tiup-playground.service.j2
+    dest: "/etc/systemd/system/{{ tidb_playground_service_name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Flush handlers to reload systemd immediately
+  ansible.builtin.meta: flush_handlers
+
+- name: Ensure TiDB playground service is started and enabled
+  ansible.builtin.systemd:
+    name: "{{ tidb_playground_service_name }}"
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Wait for TiDB playground to accept SQL connections on port 4000
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: 4000
+    timeout: "{{ tidb_playground_wait_timeout }}"

@@ -1,0 +1,24 @@
+---
+# Пользователь, от имени которого работает TiUP и запускается playground
+tidb_user: "tidb"
+tidb_group: "tidb"
+tidb_home: "/home/{{ tidb_user }}"
+tidb_create_user: true
+
+# Установщик TiUP
+tiup_install_url: "https://tiup-mirrors.pingcap.com/install.sh"
+tiup_bin_dir: "{{ tidb_home }}/.tiup/bin"
+
+# Настройки локального тестового кластера (tiup playground)
+tidb_playground_enabled: true
+tidb_playground_version: ""        # пусто = последняя стабильная версия
+tidb_playground_db_count: 1
+tidb_playground_kv_count: 1
+tidb_playground_pd_count: 1
+tidb_playground_tiflash_count: 0
+tidb_playground_host: "0.0.0.0"
+tidb_playground_tag: "ansible-managed"
+tidb_playground_wait_timeout: 240
+
+# systemd-юнит для playground
+tidb_playground_service_name: "tidb-playground"

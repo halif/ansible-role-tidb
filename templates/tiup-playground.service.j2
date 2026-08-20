@@ -1,0 +1,23 @@
+[Unit]
+Description=TiUP TiDB Playground (managed by ansible-role-tidb)
+After=network.target
+
+[Service]
+Type=simple
+User={{ tidb_user }}
+Group={{ tidb_group }}
+WorkingDirectory={{ tidb_home }}
+Environment=HOME={{ tidb_home }}
+Environment=PATH={{ tiup_bin_dir }}:/usr/bin:/bin
+ExecStart={{ tiup_bin_dir }}/tiup playground{{ ' ' + tidb_playground_version if tidb_playground_version else '' }} \
+  --host {{ tidb_playground_host }} \
+  --db {{ tidb_playground_db_count }} \
+  --kv {{ tidb_playground_kv_count }} \
+  --pd {{ tidb_playground_pd_count }} \
+  --tiflash {{ tidb_playground_tiflash_count }} \
+  --tag {{ tidb_playground_tag }}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
