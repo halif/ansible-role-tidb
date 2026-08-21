@@ -18,16 +18,16 @@ PingCAP..
 
 See the full list with default values in [`defaults/main.yml`](defaults/main.yml).
 
-| Переменная                      | По умолчанию         | Описание                                   |
-|----------------------------------|-----------------------|---------------------------------------------|
-| `tidb_user`                      | `tidb`                | Пользователь, от имени которого работает TiUP |
-| `tidb_create_user`               | `true`                | Создавать ли пользователя `tidb_user`      |
-| `tidb_playground_enabled`        | `true`                | Поднимать ли playground-кластер            |
-| `tidb_playground_version`        | `""` (latest)         | Версия TiDB для playground                 |
-| `tidb_playground_db_count`       | `1`                   | Кол-во TiDB-инстансов                      |
-| `tidb_playground_kv_count`       | `1`                   | Кол-во TiKV-инстансов                      |
-| `tidb_playground_pd_count`       | `1`                   | Кол-во PD-инстансов                        |
-| `tidb_playground_tiflash_count`  | `0`                   | Кол-во TiFlash-инстансов                   |
+| Variable                        | Default       | Description                             |
+|---------------------------------|---------------|-----------------------------------------|
+| `tidb_user`                     | `tidb`        | The user under whose identity TiUP runs |
+| `tidb_create_user`              | `true`        | Whether to create the tidb_user         |
+| `tidb_playground_enabled`       | `true`        | Whether to spin up a playground cluster |
+| `tidb_playground_version`       | `""` (latest) | TiDB version for the playground         |
+| `tidb_playground_db_count`      | `1`           | Number of TiDB instances                |
+| `tidb_playground_kv_count`      | `1`           | Number of TiKV instances                |
+| `tidb_playground_pd_count`      | `1`           | Number of PD instances                  |
+| `tidb_playground_tiflash_count` | `0`           | Number of TiFlash instances             |
 
 ## Usage Example
 
