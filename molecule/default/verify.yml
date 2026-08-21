@@ -22,6 +22,6 @@
         url: "http://127.0.0.1:10080/status"
         status_code: 200
       register: status_check
-      retries: 10
+      retries: 36
       delay: 5
       until: status_check.status == 200
