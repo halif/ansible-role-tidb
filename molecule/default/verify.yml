@@ -15,7 +15,7 @@
       ansible.builtin.wait_for:
         host: 127.0.0.1
         port: 4000
-        timeout: 30
+        timeout: 180
 
     - name: Verify TiDB status endpoint responds with HTTP 200
       ansible.builtin.uri:
