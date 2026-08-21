@@ -1,17 +1,9 @@
 ---
-- name: Ensure python3-dnf bindings are present (required for the dnf module)
-  ansible.builtin.raw: command -v dnf >/dev/null 2>&1 && dnf install -y python3-dnf || true
-  when: ansible_facts['os_family'] == 'RedHat'
-  changed_when: false
-
 - name: Install prerequisite packages (RHEL family)
-  ansible.builtin.dnf:
-    name:
-      - curl
-      - tar
-      - which
-    state: present
+  ansible.builtin.command: dnf install -y curl tar which
   when: ansible_facts['os_family'] == 'RedHat'
+  register: _dnf_install_result
+  changed_when: "'Nothing to do' not in _dnf_install_result.stdout"
 
 - name: Install prerequisite packages (Debian family)
   ansible.builtin.apt:
