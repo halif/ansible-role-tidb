@@ -1,0 +1,27 @@
+---
+galaxy_info:
+  role_name: tidb
+  namespace: halif
+  author: halif
+  description: Install TiUP and deploy a local TiDB playground cluster
+  license: MIT
+  min_ansible_version: "2.14"
+
+  platforms:
+    - name: EL
+      versions:
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+
+  galaxy_tags:
+    - tidb
+    - database
+    - tiup
+    - distributedsql
+    - newsql
+
+dependencies: []

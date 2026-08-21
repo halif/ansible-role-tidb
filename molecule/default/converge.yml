@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  become: true
+  vars:
+    tidb_playground_enabled: true
+    tidb_playground_wait_timeout: 300
+  roles:
+    - role: ../../

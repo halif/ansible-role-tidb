@@ -1,0 +1,31 @@
+---
+- name: Verify
+  hosts: all
+  become: true
+  tasks:
+    - name: Gather TiDB playground systemd service facts
+      ansible.builtin.systemd:
+        name: "{{ tidb_playground_service_name | default('tidb-playground') }}"
+      register: svc_facts
+
+    - name: Assert TiDB playground service is active
+      ansible.builtin.assert:
+        that:
+          - svc_facts.status.ActiveState == 'active'
+        fail_msg: >
+          Service state is {{ svc_facts.status.ActiveState }}, expected 'active'
+
+    - name: Verify TiDB SQL port 4000 is listening
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 4000
+        timeout: 30
+
+    - name: Verify TiDB status endpoint responds with HTTP 200
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:10080/status"
+        status_code: 200
+      register: status_check
+      retries: 10
+      delay: 5
+      until: status_check.status == 200

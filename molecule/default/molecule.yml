@@ -1,0 +1,41 @@
+---
+driver:
+  name: docker
+
+platforms:
+  - name: almalinux8-tidb
+    image: "geerlingguy/docker-rockylinux8-ansible:latest"
+    override_command: false
+    command: "/usr/sbin/init"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+
+  - name: ubuntu22-tidb
+    image: "geerlingguy/docker-ubuntu2204-ansible:latest"
+    override_command: false
+    command: "/sbin/init"
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+
+provisioner:
+  name: ansible
+  inventory:
+    group_vars:
+      all:
+        ansible_user: "root"
+
+scenario:
+  test_sequence:
+    - destroy
+    - create
+    - converge
+    - idempotence
+    - verify
+    - destroy
+
+verifier:
+  name: ansible

@@ -1,6 +1,4 @@
 ---
-# Официальный публичный установщик TiUP — не требует ни регистрации,
-# ни лицензионных ключей, ни приватных репозиториев.
 - name: Download and install TiUP for {{ tidb_user }}
   ansible.builtin.shell: |
     curl --proto '=https' --tlsv1.2 -sSf {{ tiup_install_url }} | sh
