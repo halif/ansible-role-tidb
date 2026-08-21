@@ -6,4 +6,4 @@
     tidb_playground_enabled: true
     tidb_playground_wait_timeout: 300
   roles:
-    - role: ../../
+    - role: halif.tidb
