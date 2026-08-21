@@ -8,9 +8,6 @@
     creates: "{{ tiup_bin_dir }}/tiup"
   become: true
   become_user: "{{ tidb_user }}"
-  # su вместо sudo: избегаем PAM account-фазы (pam_sss), которая в
-  # минимальных контейнерных образах RHEL/Rocky падает с ошибкой
-  # "Authentication service cannot retrieve authentication info".
   become_method: su
   environment:
     HOME: "{{ tidb_home }}"
