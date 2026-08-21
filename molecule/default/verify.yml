@@ -3,17 +3,13 @@
   hosts: all
   become: true
   tasks:
-    - name: Gather TiDB playground systemd service facts
+    - name: Wait for TiDB playground systemd service to become active
       ansible.builtin.systemd:
         name: "{{ tidb_playground_service_name | default('tidb-playground') }}"
       register: svc_facts
-
-    - name: Assert TiDB playground service is active
-      ansible.builtin.assert:
-        that:
-          - svc_facts.status.ActiveState == 'active'
-        fail_msg: >
-          Service state is {{ svc_facts.status.ActiveState }}, expected 'active'
+      until: svc_facts.status.ActiveState == 'active'
+      retries: 12
+      delay: 5
 
     - name: Verify TiDB SQL port 4000 is listening
       ansible.builtin.wait_for:
