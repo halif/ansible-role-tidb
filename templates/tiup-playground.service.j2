@@ -15,7 +15,7 @@ ExecStart={{ tiup_bin_dir }}/tiup playground{{ ' ' + tidb_playground_version if 
   --kv {{ tidb_playground_kv_count }} \
   --pd {{ tidb_playground_pd_count }} \
   --tiflash {{ tidb_playground_tiflash_count }} \
-  --tag {{ tidb_playground_tag }}
+  --tag {{ tidb_playground_tag }}{{ ' --without-monitor' if not tidb_playground_monitor_enabled else '' }}
 Restart=on-failure
 RestartSec=5
 

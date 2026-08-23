@@ -9,6 +9,10 @@
 - name: Include TiUP installation
   ansible.builtin.include_tasks: install.yml
 
+- name: Include TiDB cluster components pre-installation
+  ansible.builtin.include_tasks: components.yml
+  when: tidb_playground_enabled | bool
+
 - name: Include playground deployment
   ansible.builtin.include_tasks: playground.yml
   when: tidb_playground_enabled | bool

@@ -18,3 +18,4 @@ tidb_playground_tag: "ansible-managed"
 tidb_playground_wait_timeout: 240
 
 tidb_playground_service_name: "tidb-playground"
+tidb_playground_monitor_enabled: false

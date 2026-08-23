@@ -1,0 +1,103 @@
+---
+- name: Determine TiUP component version suffix
+  ansible.builtin.set_fact:
+    tiup_component_suffix: "{{ (':' + tidb_playground_version) if tidb_playground_version else '' }}"
+
+- name: Define required TiDB cluster components and their binaries
+  ansible.builtin.set_fact:
+    tidb_cluster_components: "{{ [{'name': 'pd', 'binary': 'pd-server'}, {'name': 'tikv', 'binary': 'tikv-server'}, {'name': 'tidb', 'binary': 'tidb-server'}] + ([{'name': 'tiflash', 'binary': 'tiflash'}] if tidb_playground_tiflash_count | int > 0 else []) }}"
+
+- name: Install TiDB cluster components via TiUP
+  ansible.builtin.command: "{{ tiup_bin_dir }}/tiup install {{ item.name }}{{ tiup_component_suffix }}"
+  become: true
+  become_user: "{{ tidb_user }}"
+  become_method: ansible.builtin.su
+  environment:
+    HOME: "{{ tidb_home }}"
+  loop: "{{ tidb_cluster_components }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _tiup_install
+  retries: 5
+  delay: 10
+  until: _tiup_install is succeeded
+  changed_when: "'Downloading' in _tiup_install.stdout"
+
+- name: Check that each component binary was actually extracted
+  ansible.builtin.find:
+    paths: "{{ tidb_home }}/.tiup/components/{{ item.name }}"
+    patterns: "{{ item.binary }}"
+    recurse: true
+  become: true
+  become_user: "{{ tidb_user }}"
+  become_method: ansible.builtin.su
+  loop: "{{ tidb_cluster_components }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _tidb_component_check
+
+- name: Identify components with a missing or corrupted binary
+  ansible.builtin.set_fact:
+    tidb_broken_components: "{{ _tidb_component_check.results | selectattr('matched', 'equalto', 0) | map(attribute='item') | list }}"
+
+- name: Report components that will be automatically repaired
+  ansible.builtin.debug:
+    msg: >-
+      Broken/incomplete install detected for:
+      {{ tidb_broken_components | map(attribute='name') | join(', ') }}.
+      Removing cached install and re-downloading.
+  when: tidb_broken_components | length > 0
+
+- name: Remove corrupted component installs so TiUP re-downloads them
+  ansible.builtin.file:
+    path: "{{ tidb_home }}/.tiup/components/{{ item.name }}"
+    state: absent
+  become: true
+  become_user: "{{ tidb_user }}"
+  become_method: ansible.builtin.su
+  loop: "{{ tidb_broken_components }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Re-install components that failed to extract correctly
+  ansible.builtin.command: "{{ tiup_bin_dir }}/tiup install {{ item.name }}{{ tiup_component_suffix }}"
+  become: true
+  become_user: "{{ tidb_user }}"
+  become_method: ansible.builtin.su
+  environment:
+    HOME: "{{ tidb_home }}"
+  loop: "{{ tidb_broken_components }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _tiup_reinstall
+  retries: 5
+  delay: 10
+  until: _tiup_reinstall is succeeded
+  changed_when: true
+
+- name: Re-check components after the repair attempt
+  ansible.builtin.find:
+    paths: "{{ tidb_home }}/.tiup/components/{{ item.name }}"
+    patterns: "{{ item.binary }}"
+    recurse: true
+  become: true
+  become_user: "{{ tidb_user }}"
+  become_method: ansible.builtin.su
+  loop: "{{ tidb_broken_components }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: _tidb_component_recheck
+
+- name: Fail with a clear message if a component is still broken after repair
+  ansible.builtin.fail:
+    msg: >-
+      TiUP could not install a working binary for {{ item.item.name }} even
+      after removing the cached install and retrying. This points to a real
+      problem (disk space, network reachability to tiup-mirrors.pingcap.com,
+      or genuinely insufficient resources) rather than a one-off extraction
+      race — check `df -h`, connectivity, and `journalctl -u
+      {{ tidb_playground_service_name }}` for details.
+  loop: "{{ _tidb_component_recheck.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.matched == 0
